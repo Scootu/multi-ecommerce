@@ -26,12 +26,17 @@ const Layout = async ({ children }: Props) => {
 
   const formattedData = data.docs.map((doc) => ({
     ...doc,
-    subcategories: (doc.subcategories?.docs ?? [])
-      .filter((subdoc: string | Category): subdoc is Category => typeof subdoc !== "string")
-      .map((subdoc) => ({
-        ...subdoc,
-        subcategories: undefined,
-      })),
+    subcategories: doc.subcategories
+      ? {
+          ...doc.subcategories,
+          docs: (doc.subcategories.docs ?? [])
+            .filter((subdoc: string | Category): subdoc is Category => typeof subdoc !== "string")
+            .map((subdoc: Category) => ({
+              ...subdoc,
+              subcategories: undefined,
+            })),
+        }
+      : undefined,
   }));
 
   console.log(formattedData);
