@@ -27,7 +27,7 @@ const Layout = async ({ children }: Props) => {
   const formattedData = data.docs.map((doc) => ({
     ...doc,
     subcategories: (doc.subcategories?.docs ?? [])
-      .filter((subdoc): subdoc is Category => typeof subdoc !== "string")
+      .filter((subdoc: string | Category): subdoc is Category => typeof subdoc !== "string")
       .map((subdoc) => ({
         ...subdoc,
         subcategories: undefined,
