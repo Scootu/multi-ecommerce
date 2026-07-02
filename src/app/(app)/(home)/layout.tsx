@@ -6,6 +6,8 @@ import { SearchFilters } from "./search-filters";
 import configPromise from "@payload-config";
 import { getPayload } from "payload";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   children: React.ReactNode;
 }
@@ -38,8 +40,6 @@ const Layout = async ({ children }: Props) => {
         }
       : undefined,
   }));
-
-  console.log(formattedData);
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
