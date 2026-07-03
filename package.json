@@ -8,8 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "generate:types":"payload generate:types"
-    
+    "generate:types": "payload generate:types",
+    "db:fresh": "payload migrate:fresh",
+    "db:seed": "tsx src/seed.ts"
+     
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -20,6 +22,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.4.0",
+    "dotenv": "^17.4.2",
     "embla-carousel-react": "^8.6.0",
     "graphql": "^16.14.2",
     "input-otp": "^1.4.2",
@@ -47,6 +50,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
+    "tsx": "^4.22.5",
     "typescript": "^5"
   }
 }

@@ -1,4 +1,22 @@
-const categories = [
+import "dotenv/config";
+
+import { getPayload } from "payload";
+
+import configPromise from "./payload.config";
+
+type SeedSubcategory = {
+  name: string;
+  slug: string;
+};
+
+type SeedCategory = {
+  name: string;
+  slug: string;
+  color?: string;
+  subcategories?: SeedSubcategory[];
+};
+
+const categories: SeedCategory[] = [
   {
     name: "All",
     slug: "all",
@@ -9,17 +27,11 @@ const categories = [
     slug: "business-money",
     subcategories: [
       { name: "Accounting", slug: "accounting" },
-      {
-        name: "Entrepreneurship",
-        slug: "entrepreneurship",
-      },
+      { name: "Entrepreneurship", slug: "entrepreneurship" },
       { name: "Gigs & Side Projects", slug: "gigs-side-projects" },
       { name: "Investing", slug: "investing" },
       { name: "Management & Leadership", slug: "management-leadership" },
-      {
-        name: "Marketing & Sales",
-        slug: "marketing-sales",
-      },
+      { name: "Marketing & Sales", slug: "marketing-sales" },
       { name: "Networking, Careers & Jobs", slug: "networking-careers-jobs" },
       { name: "Personal Finance", slug: "personal-finance" },
       { name: "Real Estate", slug: "real-estate" },
@@ -132,4 +144,96 @@ const categories = [
       { name: "Macro", slug: "macro" },
     ],
   },
-]
+];
+
+const seed = async () => {
+  const payload = await getPayload({ config: configPromise });
+
+  for (const category of categories) {
+    const existingCategory = await payload.find({
+      collection: "categories",
+      where: {
+        slug: {
+          equals: category.slug,
+        },
+      },
+      limit: 1,
+      overrideAccess: true,
+    });
+
+    const parentCategory =
+      existingCategory.docs[0] ??
+      (await payload.create({
+        collection: "categories",
+        data: {
+          name: category.name,
+          slug: category.slug,
+          color: category.color,
+          parent: null,
+        },
+        overrideAccess: true,
+      }));
+
+    if (existingCategory.docs[0]) {
+      await payload.update({
+        collection: "categories",
+        id: parentCategory.id,
+        data: {
+          name: category.name,
+          slug: category.slug,
+          color: category.color,
+          parent: null,
+        },
+        overrideAccess: true,
+      });
+    }
+
+    for (const subcategory of category.subcategories ?? []) {
+      const existingSubcategory = await payload.find({
+        collection: "categories",
+        where: {
+          slug: {
+            equals: subcategory.slug,
+          },
+        },
+        limit: 1,
+        overrideAccess: true,
+      });
+
+      if (existingSubcategory.docs[0]) {
+        await payload.update({
+          collection: "categories",
+          id: existingSubcategory.docs[0].id,
+          data: {
+            name: subcategory.name,
+            slug: subcategory.slug,
+            parent: parentCategory.id,
+          },
+          overrideAccess: true,
+        });
+        continue;
+      }
+
+      await payload.create({
+        collection: "categories",
+        data: {
+          name: subcategory.name,
+          slug: subcategory.slug,
+          parent: parentCategory.id,
+        },
+        overrideAccess: true,
+      });
+    }
+  }
+
+  console.log("Seed completed successfully");
+};
+
+seed()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("Seed failed", error);
+    process.exit(1);
+  });

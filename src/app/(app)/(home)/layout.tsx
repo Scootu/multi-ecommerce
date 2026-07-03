@@ -1,10 +1,11 @@
-import { Category } from "@/payload-types";
 import { Footer } from "./footer";
 import { Navbar } from "./navbar";
 import { SearchFilters } from "./search-filters";
 
 import configPromise from "@payload-config";
 import { getPayload } from "payload";
+import { CustomCategory } from "./types";
+import { Category } from "@/payload-types";
 
 export const dynamic = "force-dynamic";
 
@@ -24,21 +25,18 @@ const Layout = async ({ children }: Props) => {
         exists: false,
       },
     },
+    sort:"name"
+    
   });
 
-  const formattedData = data.docs.map((doc) => ({
+  const formattedData: CustomCategory[] = data.docs.map((doc) => ({
     ...doc,
-    subcategories: doc.subcategories
-      ? {
-          ...doc.subcategories,
-          docs: (doc.subcategories.docs ?? [])
-            .filter((subdoc: string | Category): subdoc is Category => typeof subdoc !== "string")
-            .map((subdoc: Category) => ({
-              ...subdoc,
-              subcategories: undefined,
-            })),
-        }
-      : undefined,
+    subcategories: (doc.subcategories?.docs ?? [])
+      .filter((subdoc: string | Category): subdoc is Category => typeof subdoc !== "string")
+      .map((subdoc: Category) => ({
+        ...subdoc,
+        subcategories: undefined,
+      })),
   }));
   return (
     <div className="flex flex-col min-h-screen">
